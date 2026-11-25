@@ -33,6 +33,11 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Your cart is empty or contains too many different items.' });
     }
 
+    const location = customer.location;
+    const hasValidLocation = location && Number.isFinite(Number(location.latitude)) && Number.isFinite(Number(location.longitude))
+      && Number(location.latitude) >= -90 && Number(location.latitude) <= 90
+      && Number(location.longitude) >= -180 && Number(location.longitude) <= 180;
+
     const normalized = [];
     let subtotal = 0;
     for (const item of items) {
@@ -73,6 +78,7 @@ exports.createOrder = async (req, res) => {
         city: String(customer.city).trim().slice(0, 80),
         state: String(customer.state).trim().slice(0, 80),
         pincode: String(customer.pincode).trim(),
+        ...(hasValidLocation ? { location: { latitude: Number(location.latitude), longitude: Number(location.longitude) } } : {}),
       },
       items: normalized,
       subtotal,
