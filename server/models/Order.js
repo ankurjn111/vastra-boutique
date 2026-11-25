@@ -21,6 +21,10 @@ const orderSchema = new mongoose.Schema({
     city: { type: String, required: true, trim: true },
     state: { type: String, required: true, trim: true },
     pincode: { type: String, required: true, trim: true },
+    location: {
+      latitude: { type: Number, min: -90, max: 90 },
+      longitude: { type: Number, min: -180, max: 180 },
+    },
   },
   items: { type: [orderItemSchema], required: true, validate: (items) => items.length > 0 },
   subtotal: { type: Number, required: true, min: 0 },
