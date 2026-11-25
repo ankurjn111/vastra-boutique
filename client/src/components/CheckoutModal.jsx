@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import LocationPicker from './LocationPicker.jsx';
 import formatPrice from '../utils/formatPrice.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -15,16 +16,21 @@ const emptyForm = {
   paymentMethod: 'cod',
 };
 
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+
 function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
   const [form, setForm] = useState(emptyForm);
   const idempotencyKeyRef = useRef(window.crypto?.randomUUID?.() || `vb-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [placedOrder, setPlacedOrder] = useState(null);
+  const [locationPickerOpen, setLocationPickerOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   function updateField(event) {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
+    if (name === 'address') setSelectedLocation(null);
   }
 
   async function submitCheckout(event) {
@@ -48,6 +54,7 @@ function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
             city: form.city,
             state: form.state,
             pincode: form.pincode,
+            location: selectedLocation,
           },
           customerNote: form.customerNote,
           paymentMethod: form.paymentMethod,
@@ -89,6 +96,17 @@ function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
               <label>Mobile number *<input name="phone" type="tel" value={form.phone} onChange={updateField} required pattern="[6-9][0-9]{9}" maxLength="10" title="Enter a 10-digit Indian mobile number" autoComplete="tel" /></label>
               <label className="checkout-field--wide">Email (optional)<input name="email" type="email" value={form.email} onChange={updateField} maxLength="160" autoComplete="email" /></label>
               <label className="checkout-field--wide">Delivery address *<textarea name="address" value={form.address} onChange={updateField} required rows="2" maxLength="500" autoComplete="street-address" /></label>
+              <div className="checkout-field--wide checkout-location">
+                <button className="button checkout-location__toggle" type="button" onClick={() => setLocationPickerOpen((open) => !open)}>
+                  <span aria-hidden="true">⌖</span> {locationPickerOpen ? 'Hide map' : 'Choose location on Google Maps'}
+                </button>
+                <p className="checkout-location__hint">Enter your address manually or select a pin on the map. Map selection is optional.</p>
+                {selectedLocation && <p className="checkout-location__selected"><strong>Map location selected</strong> · {selectedLocation.latitude.toFixed(5)}, {selectedLocation.longitude.toFixed(5)}</p>}
+                {locationPickerOpen && <LocationPicker apiKey={GOOGLE_MAPS_API_KEY} onSelect={(location) => {
+                  setSelectedLocation(location);
+                  setForm((current) => ({ ...current, address: location.address || current.address, city: location.city || current.city, state: location.state || current.state, pincode: location.pincode || current.pincode }));
+                }} />}
+              </div>
               <label>City *<input name="city" value={form.city} onChange={updateField} required maxLength="80" autoComplete="address-level2" /></label>
               <label>State *<input name="state" value={form.state} onChange={updateField} required maxLength="80" autoComplete="address-level1" /></label>
               <label>Pincode *<input name="pincode" value={form.pincode} onChange={updateField} required pattern="[0-9]{6}" maxLength="6" autoComplete="postal-code" /></label>
