@@ -15,7 +15,7 @@ const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '';
 
 function App() {
   const { products, loading, loadError, loadProducts } = useProducts();
-  const { cart, cartCount, cartTotal, addToCart, updateQuantity, removeItem } = useCart();
+  const { cart, cartCount, cartTotal, addToCart, updateQuantity, removeItem, clearCart } = useCart();
   const [activeCategory, setActiveCategory] = useState('All pieces');
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -105,7 +105,7 @@ function App() {
           cart={cart}
           cartTotal={cartTotal}
           onClose={() => setCheckoutOpen(false)}
-          onOrderPlaced={() => { removeItem; window.dispatchEvent(new CustomEvent('vastra-order-placed')); }}
+          onOrderPlaced={clearCart}
           onNotice={setNotice}
         />
       )}
