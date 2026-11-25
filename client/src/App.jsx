@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import CartDrawer from './components/CartDrawer.jsx';
+import CheckoutModal from './components/CheckoutModal.jsx';
 import CategorySection from './components/CategorySection.jsx';
 import Header from './components/Header.jsx';
 import HeroSection from './components/HeroSection.jsx';
@@ -21,6 +22,7 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedSizes, setSelectedSizes] = useState({});
   const [cartOpen, setCartOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [notice, setNotice] = useState('');
 
   useEffect(() => {
@@ -47,21 +49,6 @@ function App() {
     });
   }, [products, activeCategory, search]);
 
-  function startOrder() {
-    if (!WHATSAPP_NUMBER) {
-      setNotice('To enable WhatsApp orders, add VITE_WHATSAPP_NUMBER to the client .env file.');
-      return;
-    }
-    const orderLines = cart
-      .map((item) => `${item.name} — Size ${item.size} × ${item.quantity}`)
-      .join('\n');
-    const message = `Hi Vastra Boutique, I would like to order:\n${orderLines}\nTotal: ${formatPrice(cartTotal)}`;
-    window.open(
-      `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`,
-      '_blank',
-      'noopener,noreferrer',
-    );
-  }
 
   return (
     <>
@@ -110,7 +97,16 @@ function App() {
           }}
           onRemoveItem={removeItem}
           onUpdateQuantity={updateQuantity}
-          onStartOrder={startOrder}
+          onStartOrder={() => { setCartOpen(false); setCheckoutOpen(true); }}
+        />
+      )}
+      {checkoutOpen && (
+        <CheckoutModal
+          cart={cart}
+          cartTotal={cartTotal}
+          onClose={() => setCheckoutOpen(false)}
+          onOrderPlaced={() => { removeItem; window.dispatchEvent(new CustomEvent('vastra-order-placed')); }}
+          onNotice={setNotice}
         />
       )}
       {notice && <div className="toast" role="status">{notice}</div>}
