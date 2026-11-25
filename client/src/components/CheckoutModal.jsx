@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import formatPrice from '../utils/formatPrice.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -17,6 +17,7 @@ const emptyForm = {
 
 function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
   const [form, setForm] = useState(emptyForm);
+  const idempotencyKeyRef = useRef(window.crypto?.randomUUID?.() || `vb-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [placedOrder, setPlacedOrder] = useState(null);
@@ -36,7 +37,7 @@ function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Idempotency-Key': window.crypto?.randomUUID?.() || `vb-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          'Idempotency-Key': idempotencyKeyRef.current,
         },
         body: JSON.stringify({
           customer: {
@@ -56,6 +57,7 @@ function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Your order could not be placed.');
       setPlacedOrder(data);
+      idempotencyKeyRef.current = window.crypto?.randomUUID?.() || `vb-${Date.now()}-${Math.random().toString(36).slice(2)}`;
       onOrderPlaced();
     } catch (submitError) {
       setError(submitError.message || 'Your order could not be placed. Please try again.');
