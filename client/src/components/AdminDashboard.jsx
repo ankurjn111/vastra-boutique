@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import AdminProductForm from './AdminProductForm.jsx';
 import AdminProductList from './AdminProductList.jsx';
+import AdminOrderList from './AdminOrderList.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const TOKEN_KEY = 'vastra-admin-token';
@@ -47,6 +48,7 @@ function AdminDashboard({ user, onSignOut }) {
         </section>
         <AdminProductForm onCreated={loadProducts} />
         <AdminProductList products={products} loading={loading} error={error} onRetry={loadProducts} />
+        <AdminOrderList />
       </div>
     </main>
   );
