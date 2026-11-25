@@ -10,6 +10,7 @@ const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/authRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 const app = express();
 
 // Middleware
@@ -38,6 +39,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/orders', orderRoutes);
 
 if (require.main === module) {
   const PORT = process.env.PORT || 5000;
