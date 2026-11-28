@@ -429,6 +429,13 @@ h1 em, h2 em, .category-note__title em, .story__signature em, .newsletter h2 em,
 .admin-order__customer { display:grid; gap:5px; padding:12px 0; font-size:11px; }
 .admin-order__customer p { margin:0; color:var(--muted); font-size:10px; line-height:1.6; }
 .admin-order__items { display:grid; gap:7px; margin:0; padding:12px 0; border-top:1px solid var(--line); list-style:none; }
+.admin-order__item { display:flex; align-items:center; gap:10px; min-width:0; padding:5px 0; color:#625b54; font-size:10px; }
+.admin-order__item-image { display:block; flex:0 0 52px; width:52px; height:64px; object-fit:cover; border:1px solid var(--line); border-radius:4px; background:#f3f0e9; }
+.admin-order__item-image--empty { display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:8px; }
+.admin-order__item-details { display:grid; min-width:0; flex:1; gap:4px; }
+.admin-order__item-details strong { overflow:hidden; color:var(--ink); font-size:10px; text-overflow:ellipsis; }
+.admin-order__item-details span { color:var(--muted); font-size:9px; }
+.admin-order__item-price { flex:0 0 auto; color:var(--ink); white-space:nowrap; font-size:10px; }
 .admin-order__items li { display:flex; justify-content:space-between; gap:12px; color:#625b54; font-size:10px; }
 .admin-order__items strong { color:var(--ink); white-space:nowrap; }
 .admin-order__meta { display:flex; flex-wrap:wrap; gap:16px; padding:10px 0; color:var(--muted); font-size:9px; }
