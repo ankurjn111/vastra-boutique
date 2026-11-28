@@ -185,10 +185,6 @@ function AdminProductList({ products, loading, error, onRetry, onUpdated }) {
                     <button className="button button--dark" type="submit" disabled={busyId === product._id}>
                       {busyId === product._id ? 'Saving…' : 'Save changes'}
                     </button>
-                    <button className="button button--outline" type="button" disabled={busyId === product._id}
-                      onClick={() => { setEditingId(''); setEditForm({}); setActionError(''); }}>
-                      Cancel
-                    </button>
                   </div>
                 </form>
               )}
