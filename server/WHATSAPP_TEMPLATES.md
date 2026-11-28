@@ -9,11 +9,11 @@ Create and get approval for these two **Utility** templates in WhatsApp Manager 
 - Language: English (`en`)
 
 Body:
-`Hi {{1}}, we have received your order {{2}}. Items: {{3}}. Order total: INR {{4}}. Payment method: {{5}}. Our Vastra Boutique team will contact you if anything else is needed. Thank you!`
+`We have received order {{1}} for {{2}}. Items: {{3}}. Order total: INR {{4}}. Payment method: {{5}}. Our Vastra Boutique team will contact you if anything else is needed. Thank you!`
 
 Example values:
-- {{1}} Ankur Jain
-- {{2}} VB123456789
+- {{1}} VB123456789
+- {{2}} Ankur Jain
 - {{3}} Teal embroidered set (Size M) x1
 - {{4}} 3499
 - {{5}} Cash on Delivery
