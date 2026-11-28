@@ -58,11 +58,13 @@ function useCart() {
     );
   }
 
+  function clearCart() { setCart([]); }
+
   function removeItem(id, size) {
     setCart((items) => items.filter((item) => item.id !== id || item.size !== size));
   }
 
-  return { cart, cartCount, cartTotal, addToCart, updateQuantity, removeItem };
+  return { cart, cartCount, cartTotal, addToCart, updateQuantity, removeItem, clearCart };
 }
 
 export default useCart;
