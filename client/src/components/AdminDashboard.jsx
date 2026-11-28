@@ -47,7 +47,7 @@ function AdminDashboard({ user, onSignOut }) {
           <p>Add dresses to your catalog and see what is already in your store.</p>
         </section>
         <AdminProductForm onCreated={loadProducts} />
-        <AdminProductList products={products} loading={loading} error={error} onRetry={loadProducts} />
+        <AdminProductList products={products} loading={loading} error={error} onRetry={loadProducts} onUpdated={loadProducts} />
         <AdminOrderList />
       </div>
     </main>
