@@ -27,8 +27,8 @@ function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
   const [selectedLocation, setSelectedLocation] = useState(null);
 
   function updateField(event) {
-    const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
+    const { name, value, type, checked } = event.target;
+    setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }));
     if (name === 'address') setSelectedLocation(null);
   }
 
@@ -57,6 +57,7 @@ function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
           },
           customerNote: form.customerNote,
           paymentMethod: form.paymentMethod,
+          whatsappUpdates: form.whatsappUpdates,
           items: cart.map((item) => ({ productId: item.id, size: item.size, quantity: item.quantity })),
         }),
       });
