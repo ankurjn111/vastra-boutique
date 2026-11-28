@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
-const { sendOrderNotifications } = require('../services/whatsappService');
+const { sendOrderNotifications, sendOrderCancellationNotification } = require('../services/whatsappService');
 
 const createOrderNumber = () => `VB${Date.now().toString().slice(-8)}${crypto.randomInt(100, 999)}`;
 
@@ -203,6 +203,13 @@ exports.updateOrder = async (req, res) => {
   const allowedStatuses = ['placed', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
   const allowedPaymentStatuses = ['pending', 'paid', 'failed', 'refunded'];
   const updates = {};
+  const cancellationReasons = ['Customer requested', 'Product unavailable', 'Payment not received', 'Other'];
+  if (req.body.orderStatus === 'cancelled') {
+    if (!cancellationReasons.includes(req.body.cancellationReason)) {
+      return res.status(400).json({ message: 'Please select a valid cancellation reason.' });
+    }
+    updates.cancellationReason = req.body.cancellationReason;
+  }
   if (req.body.orderStatus !== undefined) {
     if (!allowedStatuses.includes(req.body.orderStatus)) return res.status(400).json({ message: 'Invalid order status.' });
     updates.orderStatus = req.body.orderStatus;
@@ -215,6 +222,7 @@ exports.updateOrder = async (req, res) => {
 
   const session = await mongoose.startSession();
   let updatedOrder;
+  let shouldNotifyCancellation = false;
   try {
     await session.withTransaction(async () => {
       const order = await Order.findById(req.params.id).session(session);
@@ -231,6 +239,7 @@ exports.updateOrder = async (req, res) => {
       }
 
       const isNewCancellation = updates.orderStatus === 'cancelled' && order.orderStatus !== 'cancelled';
+      shouldNotifyCancellation = isNewCancellation;
       if (isNewCancellation) {
         for (const item of order.items) {
           await Product.updateOne(
@@ -245,7 +254,19 @@ exports.updateOrder = async (req, res) => {
       updatedOrder = await order.save({ session });
     });
 
-    return res.json(updatedOrder);
+    let cancellationNotification = { sent: false, skipped: true };
+    if (shouldNotifyCancellation) {
+      try {
+        cancellationNotification = await sendOrderCancellationNotification(updatedOrder);
+      } catch (notificationError) {
+        console.error('Order cancelled, but customer WhatsApp notification failed:', notificationError.message);
+        cancellationNotification = { sent: false, reason: 'WhatsApp notification failed.' };
+      }
+    }
+    return res.json({
+      ...updatedOrder.toObject(),
+      cancellationNotification,
+    });
   } catch (error) {
     if (error.statusCode) return res.status(error.statusCode).json({ message: error.message });
     console.error('Update order error:', error);
