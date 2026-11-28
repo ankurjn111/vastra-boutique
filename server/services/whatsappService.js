@@ -1,4 +1,4 @@
-const GRAPH_API_VERSION = process.env.WHATSAPP_API_VERSION || 'v22.0';
+const GRAPH_API_VERSION = process.env.WHATSAPP_API_VERSION || 'v27.0';
 
 function normalizePhone(value) {
   const digits = String(value || '').replace(/\D/g, '');
