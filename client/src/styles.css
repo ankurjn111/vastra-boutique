@@ -590,3 +590,7 @@ h1 em, h2 em, .category-note__title em, .story__signature em, .newsletter h2 em,
   .admin-order-cancel { grid-template-columns: 1fr; padding: 14px; }
   .admin-order-cancel__actions { grid-column: 1; flex-wrap: wrap; }
 }
+
+
+.admin-order__cancellation-reason { margin: 10px 0 0; color: #8a625a; font-size: 10px; }
+.admin-order__cancellation-reason strong { color: #70413d; font-weight: 600; }
