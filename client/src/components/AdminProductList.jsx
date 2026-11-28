@@ -181,9 +181,15 @@ function AdminProductList({ products, loading, error, onRetry, onUpdated }) {
                     </label>
                   </div>
                   <p className="admin-product-edit__note">Existing product photos will be kept. Image replacement can be added separately.</p>
-                  <button className="button button--dark" type="submit" disabled={busyId === product._id}>
-                    {busyId === product._id ? 'Saving…' : 'Save changes'}
-                  </button>
+                  <div className="admin-product-edit__actions">
+                    <button className="button button--dark" type="submit" disabled={busyId === product._id}>
+                      {busyId === product._id ? 'Saving…' : 'Save changes'}
+                    </button>
+                    <button className="button button--outline" type="button" disabled={busyId === product._id}
+                      onClick={() => { setEditingId(''); setEditForm({}); setActionError(''); }}>
+                      Cancel
+                    </button>
+                  </div>
                 </form>
               )}
             </React.Fragment>
