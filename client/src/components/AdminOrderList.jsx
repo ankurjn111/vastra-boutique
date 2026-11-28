@@ -72,9 +72,22 @@ function AdminOrderList() {
                 <strong>{order.customer?.name}</strong><span>{order.customer?.phone}</span>
                 <p>{order.customer?.address}, {order.customer?.city}, {order.customer?.state} – {order.customer?.pincode}</p>
               </div>
-              <ul className="admin-order__items">
-                {order.items?.map((item, index) => <li key={`${order._id}-${index}`}>{item.name} · {item.size} × {item.quantity} <strong>{formatPrice(item.lineTotal)}</strong></li>)}
-              </ul>
+              <div className="admin-order__items">
+                {order.items?.map((item, index) => (
+                  <div className="admin-order__item" key={`${order._id}-${index}`}>
+                    {item.image ? (
+                      <img className="admin-order__item-image" src={item.image} alt={item.name} loading="lazy" />
+                    ) : (
+                      <div className="admin-order__item-image admin-order__item-image--empty" aria-label="Product image unavailable">No image</div>
+                    )}
+                    <div className="admin-order__item-details">
+                      <strong>{item.name}</strong>
+                      <span>Size: {item.size} · Qty: {item.quantity}</span>
+                    </div>
+                    <strong className="admin-order__item-price">{formatPrice(item.lineTotal)}</strong>
+                  </div>
+                ))}
+              </div>
               <div className="admin-order__meta"><span>Payment: <strong>{order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online'}</strong></span><span>Payment status: <strong>{order.paymentStatus}</strong></span></div>
               <div className="admin-order__controls">
                 <label>Order status<select value={order.orderStatus} disabled={savingId === order._id} onChange={(event) => updateOrder(order._id, { orderStatus: event.target.value })}>{ORDER_STATUSES.map((status) => <option value={status} key={status}>{status}</option>)}</select></label>
