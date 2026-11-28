@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import './LocationPicker.css';
 
 const LEAFLET_VERSION = '1.9.4';
+const JAIPUR = [26.9124, 75.7873];
 let leafletPromise;
 let lastNominatimRequest = 0;
 
@@ -53,10 +54,22 @@ function mapAddress(result) {
   const address = result.address || {};
   return {
     address: result.display_name || '',
-    city: address.city || address.town || address.village || address.municipality || address.county || '',
-    state: address.state || '',
+    city: address.city || address.town || address.village || address.municipality || address.county || 'Jaipur',
+    state: address.state || 'Rajasthan',
     pincode: address.postcode || '',
   };
+}
+
+function getFeatureLabel(properties) {
+  return [
+    properties.name,
+    properties.housenumber,
+    properties.street,
+    properties.suburb || properties.neighbourhood,
+    properties.district,
+    properties.city || properties.town || properties.village,
+    properties.state,
+  ].filter(Boolean).filter((value, index, values) => values.indexOf(value) === index).join(', ');
 }
 
 function LocationPicker({ onSelect }) {
@@ -65,7 +78,9 @@ function LocationPicker({ onSelect }) {
   const markerRef = useRef(null);
   const onSelectRef = useRef(onSelect);
   const [search, setSearch] = useState('');
-  const [message, setMessage] = useState('Search for an address or click the map to select your delivery location.');
+  const [suggestions, setSuggestions] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [message, setMessage] = useState('Type an address or landmark to see suggestions, or click the map to drop a pin.');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
@@ -76,7 +91,7 @@ function LocationPicker({ onSelect }) {
 
     loadLeaflet().then((L) => {
       if (!active || !mapElementRef.current || mapRef.current) return;
-      map = L.map(mapElementRef.current).setView([26.9124, 75.7873], 12);
+      map = L.map(mapElementRef.current).setView(JAIPUR, 12);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -95,6 +110,52 @@ function LocationPicker({ onSelect }) {
     };
   }, []);
 
+  useEffect(() => {
+    const term = search.trim();
+    if (term.length < 3) {
+      setSuggestions([]);
+      setSearching(false);
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      setSearching(true);
+      try {
+        const query = new URLSearchParams({
+          q: `${term}, Jaipur, Rajasthan, India`,
+          lat: String(JAIPUR[0]),
+          lon: String(JAIPUR[1]),
+          limit: '7',
+          lang: 'en',
+        });
+        const response = await fetch(`https://photon.komoot.io/api/?${query}`, {
+          signal: controller.signal,
+          headers: { Accept: 'application/json' },
+        });
+        if (!response.ok) throw new Error('Suggestions are temporarily unavailable.');
+        const data = await response.json();
+        const indiaResults = (data.features || []).filter((feature) => {
+          const country = feature.properties?.country;
+          return !country || country.toLowerCase() === 'india';
+        });
+        if (!controller.signal.aborted) {
+          setSuggestions(indiaResults.slice(0, 6));
+          setMessage(indiaResults.length ? 'Choose an address suggestion to zoom in and place the pin.' : 'No suggestions found. Try adding Jaipur or a nearby landmark.');
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') setMessage(error.message || 'Could not load address suggestions.');
+      } finally {
+        if (!controller.signal.aborted) setSearching(false);
+      }
+    }, 450);
+
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [search]);
+
   async function selectCoordinates(latitude, longitude, L = window.L) {
     if (!L || !mapRef.current) return;
     setLoading(true);
@@ -105,11 +166,10 @@ function LocationPicker({ onSelect }) {
       );
       const location = { latitude, longitude, ...mapAddress(results) };
       if (markerRef.current) markerRef.current.remove();
-      markerRef.current = L.circleMarker([latitude, longitude], {
-        radius: 9, color: '#683b3b', weight: 3, fillColor: '#ffffff', fillOpacity: 1,
-      }).addTo(mapRef.current);
+      markerRef.current = L.marker([latitude, longitude]).addTo(mapRef.current);
       onSelectRef.current(location);
       setSearch(location.address);
+      setSuggestions([]);
       setMessage('Location selected. You can still edit the address and add house or landmark details.');
     } catch (error) {
       setMessage(error.message || 'Address lookup failed. You can enter the address manually.');
@@ -118,37 +178,67 @@ function LocationPicker({ onSelect }) {
     }
   }
 
-  async function searchAddress(event) {
+  function chooseSuggestion(feature) {
+    const [longitude, latitude] = feature.geometry.coordinates;
+    const properties = feature.properties || {};
+    const label = getFeatureLabel(properties) || properties.name || 'Selected map location';
+    const L = window.L;
+    if (!L || !mapRef.current) return;
+
+    mapRef.current.setView([latitude, longitude], 18, { animate: true });
+    if (markerRef.current) markerRef.current.remove();
+    markerRef.current = L.marker([latitude, longitude]).addTo(mapRef.current);
+    const location = {
+      latitude,
+      longitude,
+      address: label,
+      city: properties.city || properties.town || properties.village || properties.district || 'Jaipur',
+      state: properties.state || 'Rajasthan',
+      pincode: properties.postcode || '',
+    };
+    onSelectRef.current(location);
+    setSearch(label);
+    setSuggestions([]);
+    setMessage('Location selected and pinned. Drag the map or click another point to adjust the pin.');
+  }
+
+  function searchAddress(event) {
     event.preventDefault();
-    if (!search.trim() || !mapRef.current || loading) return;
-    setLoading(true);
-    setMessage('Searching for this address…');
-    try {
-      const query = new URLSearchParams({
-        format: 'jsonv2', addressdetails: '1', country: 'India', limit: '1', q: search.trim(),
-      });
-      const results = await nominatimRequest(`https://nominatim.openstreetmap.org/search?${query}`);
-      if (!results.length) {
-        setMessage('No matching location found. Try a nearby landmark or click the map manually.');
-        return;
-      }
-      const point = results[0];
-      const latitude = Number(point.lat);
-      const longitude = Number(point.lon);
-      mapRef.current.setView([latitude, longitude], 16);
-      await selectCoordinates(latitude, longitude);
-    } catch (error) {
-      setMessage(error.message || 'Search failed. You can enter the address manually.');
-    } finally {
-      setLoading(false);
-    }
+    if (suggestions.length) chooseSuggestion(suggestions[0]);
+    else if (search.trim()) setMessage('No matching suggestion yet. Try a more complete address, such as “P.No. 21, Himgiri Royal Tower, Jaipur”.');
   }
 
   return (
     <div className="location-picker">
       <form className="location-picker__search" onSubmit={searchAddress}>
-        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search area, street or landmark" aria-label="Search map location" />
-        <button type="submit" disabled={loading}>{loading ? 'Searching…' : 'Search map'}</button>
+        <div className="location-picker__input-wrap">
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            onFocus={() => { if (search.trim().length >= 3) setMessage('Choose an address suggestion from the list.'); }}
+            placeholder="Search plot, building, colony or landmark"
+            aria-label="Search delivery address"
+            aria-autocomplete="list"
+            aria-expanded={suggestions.length > 0}
+          />
+          {searching && <span className="location-picker__searching">Finding suggestions…</span>}
+          {suggestions.length > 0 && (
+            <ul className="location-picker__suggestions" role="listbox" aria-label="Address suggestions">
+              {suggestions.map((feature, index) => {
+                const label = getFeatureLabel(feature.properties || {}) || 'Map location';
+                return (
+                  <li key={feature.properties?.osm_id || `${label}-${index}`}>
+                    <button type="button" role="option" onClick={() => chooseSuggestion(feature)}>
+                      <span className="location-picker__suggestion-icon" aria-hidden="true">⌖</span>
+                      <span>{label}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+        <button type="submit" disabled={loading || searching}>{loading ? 'Selecting…' : 'Search map'}</button>
       </form>
       <div className="location-picker__map" ref={mapElementRef} role="application" aria-label="OpenStreetMap. Click to select delivery location." />
       <p className="location-picker__message" aria-live="polite">{message}</p>
