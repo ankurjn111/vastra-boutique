@@ -77,6 +77,7 @@ function LocationPicker({ onSelect }) {
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const onSelectRef = useRef(onSelect);
+  const skipNextSearchRef = useRef(false);
   const [search, setSearch] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -111,6 +112,10 @@ function LocationPicker({ onSelect }) {
   }, []);
 
   useEffect(() => {
+    if (skipNextSearchRef.current) {
+      skipNextSearchRef.current = false;
+      return undefined;
+    }
     const term = search.trim();
     if (term.length < 3) {
       setSuggestions([]);
@@ -168,6 +173,7 @@ function LocationPicker({ onSelect }) {
       if (markerRef.current) markerRef.current.remove();
       markerRef.current = L.marker([latitude, longitude]).addTo(mapRef.current);
       onSelectRef.current(location);
+      skipNextSearchRef.current = true;
       setSearch(location.address);
       setSuggestions([]);
       setMessage('Location selected. You can still edit the address and add house or landmark details.');
@@ -197,6 +203,7 @@ function LocationPicker({ onSelect }) {
       pincode: properties.postcode || '',
     };
     onSelectRef.current(location);
+    skipNextSearchRef.current = true;
     setSearch(label);
     setSuggestions([]);
     setMessage('Location selected and pinned. Drag the map or click another point to adjust the pin.');
