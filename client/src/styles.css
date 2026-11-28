@@ -449,6 +449,19 @@ h1 em, h2 em, .category-note__title em, .story__signature em, .newsletter h2 em,
   .hero__copy > p { margin-bottom: 18px; font-size: 11px; line-height: 1.65; }
   .hero__note { margin-top: 14px; }
   .hero__image-stamp { top: 28px; right: 28px; width: 72px; height: 72px; }
+
+  .collection { padding-top: 38px; padding-bottom: 30px; }
+  .collection__top .section-heading h2 { margin-top: 10px; font-size: clamp(34px, 3.2vw, 44px); }
+  .collection__top .section-heading > p { max-width: 245px; margin-bottom: 3px; font-size: 10px; }
+  .collection-controls { min-height: 48px; margin: 12px 0; }
+  .filter-chip { min-height: 27px; padding: 0 10px; font-size: 8px; }
+  .product-grid { gap: 14px; }
+  .product-card__image-wrap { height: clamp(190px, calc(100svh - 380px), 280px); aspect-ratio: auto; }
+  .product-card__favorite { top: 9px; right: 9px; width: 28px; height: 28px; }
+  .product-card__add { right: 8px; bottom: 8px; left: 8px; min-height: 34px; padding: 0 10px; }
+  .product-card__info { padding-top: 9px; }
+  .product-card__info h3 { font-size: 13px; }
+  .product-card__sizes { margin-top: 6px; }
 }
 @media (max-width:600px) {
   .checkout-backdrop { align-items:end; padding:0; }
