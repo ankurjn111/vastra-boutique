@@ -139,11 +139,12 @@ function AdminProductList({ products, loading, error, onRetry, onUpdated }) {
                 <div className="admin-product__details">
                   <span>{product.category}{product.fabric ? ` · ${product.fabric}` : ''}</span>
                   <h3>{product.name}</h3>
-                  <p>{product.sizes?.join(' · ') || 'Sizes not set'} · Stock: <strong>{product.stock ?? 0}</strong></p>
+                  <p className="admin-product__sizes">{product.sizes?.join(' · ') || 'Sizes not set'}</p>
                   <div className="admin-product__stock" aria-label={`Update stock for ${product.name}`}>
-                    <button type="button" aria-label="Decrease stock" disabled={busyId === product._id || Number(product.stock || 0) <= 0} onClick={() => changeStock(product, -1)}>−</button>
-                    <span>Quick stock</span>
-                    <button type="button" aria-label="Increase stock" disabled={busyId === product._id} onClick={() => changeStock(product, 1)}>+</button>
+                    <span className="admin-product__stock-label">Stock</span>
+                    <strong className={`admin-product__stock-count${Number(product.stock || 0) === 0 ? ' is-out' : ''}`}>{product.stock ?? 0}</strong>
+                    <button type="button" aria-label={`Decrease ${product.name} stock`} disabled={busyId === product._id || Number(product.stock || 0) <= 0} onClick={() => changeStock(product, -1)}>−</button>
+                    <button type="button" aria-label={`Increase ${product.name} stock`} disabled={busyId === product._id} onClick={() => changeStock(product, 1)}>+</button>
                   </div>
                 </div>
                 <div className="admin-product__actions">
