@@ -565,3 +565,28 @@ h1 em, h2 em, .category-note__title em, .story__signature em, .newsletter h2 em,
   .admin-product__actions { gap: 7px; }
   .admin-product__actions .button { min-width: 54px; padding: 0 9px; }
 }
+
+
+/* Admin order cancellation confirmation */
+.admin-order-cancel {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 240px);
+  gap: 14px 20px;
+  align-items: end;
+  margin-top: 16px;
+  padding: 18px 20px;
+  border: 1px solid #e5d8d1;
+  background: #fbf7f3;
+}
+.admin-order-cancel > div:first-child strong { color: #6f3832; font-family: var(--serif); font-size: 18px; font-weight: 400; }
+.admin-order-cancel > div:first-child p { margin: 5px 0 0; color: #82776f; font-size: 10px; line-height: 1.6; }
+.admin-order-cancel > label { display: grid; gap: 6px; color: #74685f; font-size: 9px; }
+.admin-order-cancel > label select { width: 100%; min-height: 38px; padding: 0 10px; border: 1px solid #d9d0c5; background: #fffdfa; color: #342c27; font: inherit; }
+.admin-order-cancel__actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 9px; }
+.admin-order-cancel__actions .button { min-height: 36px; padding: 0 15px; font-size: 9px; }
+.admin-order-cancel__actions .button--dark { background: #70413d; border-color: #70413d; }
+.admin-order-cancel__actions .button--dark:hover:not(:disabled) { background: #572f2c; border-color: #572f2c; }
+@media (max-width: 600px) {
+  .admin-order-cancel { grid-template-columns: 1fr; padding: 14px; }
+  .admin-order-cancel__actions { grid-column: 1; flex-wrap: wrap; }
+}
