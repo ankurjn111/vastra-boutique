@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const { sendOrderNotifications } = require('../services/whatsappService');
 
 const createOrderNumber = () => `VB${Date.now().toString().slice(-8)}${crypto.randomInt(100, 999)}`;
 
@@ -88,7 +89,15 @@ exports.createOrder = async (req, res) => {
       paymentStatus: 'pending',
       orderStatus: 'placed',
       customerNote: String(customerNote).trim().slice(0, 500),
+      whatsappUpdatesOptIn: req.body.whatsappUpdates === true,
     });
+
+    let whatsappNotifications = [];
+    try {
+      whatsappNotifications = await sendOrderNotifications(order);
+    } catch (notificationError) {
+      console.error('Order saved, but WhatsApp notifications failed:', notificationError.message);
+    }
 
     return res.status(201).json({
       order: {
@@ -99,6 +108,11 @@ exports.createOrder = async (req, res) => {
         paymentStatus: order.paymentStatus,
         orderStatus: order.orderStatus,
         createdAt: order.createdAt,
+      },
+      notifications: {
+        ownerWhatsAppSent: Boolean(whatsappNotifications[0]?.sent),
+        customerWhatsAppRequested: order.whatsappUpdatesOptIn,
+        customerWhatsAppSent: order.whatsappUpdatesOptIn ? Boolean(whatsappNotifications[1]?.sent) : false,
       },
       message: paymentMethod === 'online'
         ? 'Order received. The boutique will contact you with secure online payment instructions before processing.'
