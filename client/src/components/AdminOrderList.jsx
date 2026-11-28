@@ -102,6 +102,9 @@ function AdminOrderList() {
                 ))}
               </div>
               <div className="admin-order__meta"><span>Payment: <strong>{order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online'}</strong></span><span>Payment status: <strong>{order.paymentStatus}</strong></span></div>
+              {order.orderStatus === 'cancelled' && order.cancellationReason && (
+                <p className="admin-order__cancellation-reason">Cancellation reason: <strong>{order.cancellationReason}</strong></p>
+              )}
               <div className="admin-order__controls">
                 <label>Order status<select value={order.orderStatus} disabled={savingId === order._id || order.orderStatus === 'cancelled'} onChange={(event) => {
                   if (event.target.value === 'cancelled') {
