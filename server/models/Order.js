@@ -34,6 +34,7 @@ const orderSchema = new mongoose.Schema({
   paymentStatus: { type: String, enum: ['pending', 'paid', 'failed', 'refunded'], default: 'pending' },
   orderStatus: { type: String, enum: ['placed', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'], default: 'placed' },
   customerNote: { type: String, maxlength: 500, default: '' },
+  whatsappUpdatesOptIn: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);
