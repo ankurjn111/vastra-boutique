@@ -445,22 +445,7 @@ h1 em, h2 em, .category-note__title em, .story__signature em, .newsletter h2 em,
   .admin-order__items li { flex-direction:column; gap:3px; }
 }
 
-
-/* Optional Google Maps delivery location picker */
-.checkout-location { display: grid; gap: 8px; }
-.checkout-location__toggle { width: fit-content; min-height: 40px; gap: 9px; border-color: #cfc6bb; background: transparent; color: var(--ink); }
-.checkout-location__toggle span { font-size: 18px; }
-.checkout-location__hint, .checkout-location__selected { margin: 0; color: var(--muted); font-size: 9px; line-height: 1.6; }
-.checkout-location__selected { color: #476b4e; }
-.location-picker { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--line); background: #fffdfa; }
-.location-picker__search { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
-.location-picker__search input { min-width: 0; min-height: 40px; padding: 9px 10px; border: 1px solid #d9d2c8; background: white; color: var(--ink); font: inherit; font-size: 11px; }
-.location-picker__search button { min-height: 40px; padding: 0 13px; border: 0; background: var(--ink); color: white; cursor: pointer; font-size: 10px; }
-.location-picker__search button:disabled { opacity: .6; cursor: wait; }
-.location-picker__map { width: 100%; height: 280px; background: #eee9e1; }
-.location-picker__message { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
-.location-picker__message--error { color: #9a3e34; }
-@media (max-width: 600px) {
+/* OpenStreetMap Leaflet delivery location picker */
   .location-picker__search { grid-template-columns: 1fr; }
   .location-picker__map { height: 240px; }
 }
