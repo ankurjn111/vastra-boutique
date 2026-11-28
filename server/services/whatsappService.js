@@ -98,4 +98,19 @@ async function sendOrderNotifications(order) {
     : { sent: false, reason: 'WhatsApp notification could not be sent.' });
 }
 
-module.exports = { sendOrderNotifications };
+
+async function sendOrderCancellationNotification(order) {
+  if (!order.whatsappUpdatesOptIn) {
+    return { sent: false, skipped: true, reason: 'Customer did not opt in to WhatsApp order updates.' };
+  }
+
+  const customerPhone = normalizePhone(order.customer?.phone);
+  return sendTemplate(customerPhone, process.env.WHATSAPP_CANCELLATION_TEMPLATE, [
+    order.orderNumber,
+    order.customer?.name,
+    order.cancellationReason || 'Please contact the boutique for details.',
+    order.total,
+  ]);
+}
+
+module.exports = { sendOrderNotifications, sendOrderCancellationNotification };
