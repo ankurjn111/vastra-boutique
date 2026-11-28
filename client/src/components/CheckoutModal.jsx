@@ -14,6 +14,7 @@ const emptyForm = {
   pincode: '',
   customerNote: '',
   paymentMethod: 'cod',
+  whatsappUpdates: true,
 };
 
 function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
@@ -110,6 +111,7 @@ function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
               <label>Pincode *<input name="pincode" value={form.pincode} onChange={updateField} required pattern="[0-9]{6}" maxLength="6" autoComplete="postal-code" /></label>
               <label className="checkout-field--wide">Order note (optional)<textarea name="customerNote" value={form.customerNote} onChange={updateField} rows="2" maxLength="500" placeholder="Any delivery or stitching instructions?" /></label>
             </div>
+            <label className="checkout-whatsapp-optin"><input type="checkbox" name="whatsappUpdates" checked={form.whatsappUpdates} onChange={updateField} /> <span>Send me order confirmation and delivery updates on WhatsApp.</span></label>
             <fieldset className="checkout-payment">
               <legend>Payment method</legend>
               <label><input type="radio" name="paymentMethod" value="cod" checked={form.paymentMethod === 'cod'} onChange={updateField} /> <span><strong>Cash on Delivery</strong><small>Pay when your order arrives.</small></span></label>
