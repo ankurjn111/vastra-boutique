@@ -14,7 +14,7 @@ const emptyForm = {
   pincode: '',
   customerNote: '',
   paymentMethod: 'cod',
-  whatsappUpdates: true,
+  whatsappUpdates: false,
 };
 
 function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
