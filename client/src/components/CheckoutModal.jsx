@@ -16,8 +16,6 @@ const emptyForm = {
   paymentMethod: 'cod',
 };
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-
 function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
   const [form, setForm] = useState(emptyForm);
   const idempotencyKeyRef = useRef(window.crypto?.randomUUID?.() || `vb-${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -98,11 +96,11 @@ function CheckoutModal({ cart, cartTotal, onClose, onOrderPlaced, onNotice }) {
               <label className="checkout-field--wide">Delivery address *<textarea name="address" value={form.address} onChange={updateField} required rows="2" maxLength="500" autoComplete="street-address" /></label>
               <div className="checkout-field--wide checkout-location">
                 <button className="button checkout-location__toggle" type="button" onClick={() => setLocationPickerOpen((open) => !open)}>
-                  <span aria-hidden="true">⌖</span> {locationPickerOpen ? 'Hide map' : 'Choose location on Google Maps'}
+                  <span aria-hidden="true">⌖</span> {locationPickerOpen ? 'Hide map' : 'Choose delivery location on map'}
                 </button>
                 <p className="checkout-location__hint">Enter your address manually or select a pin on the map. Map selection is optional.</p>
                 {selectedLocation && <p className="checkout-location__selected"><strong>Map location selected</strong> · {selectedLocation.latitude.toFixed(5)}, {selectedLocation.longitude.toFixed(5)}</p>}
-                {locationPickerOpen && <LocationPicker apiKey={GOOGLE_MAPS_API_KEY} onSelect={(location) => {
+                {locationPickerOpen && <LocationPicker onSelect={(location) => {
                   setSelectedLocation(location);
                   setForm((current) => ({ ...current, address: location.address || current.address, city: location.city || current.city, state: location.state || current.state, pincode: location.pincode || current.pincode }));
                 }} />}
