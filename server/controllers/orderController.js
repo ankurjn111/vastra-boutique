@@ -37,12 +37,14 @@ exports.createOrder = async (req, res) => {
 
   const session = await mongoose.startSession();
   let createdOrder;
+  let duplicateRequest = false;
 
   try {
     await session.withTransaction(async () => {
       const existing = await Order.findOne({ idempotencyKey }).session(session);
       if (existing) {
         createdOrder = existing;
+        duplicateRequest = true;
         return;
       }
 
@@ -134,7 +136,7 @@ exports.createOrder = async (req, res) => {
     }
 
     // A duplicate retry must not send another notification or reserve stock again.
-    if (String(createdOrder.idempotencyKey) === idempotencyKey && createdOrder.createdAt < new Date(Date.now() - 1000)) {
+    if (duplicateRequest) {
       return res.status(200).json({
         order: {
           orderNumber: createdOrder.orderNumber,
